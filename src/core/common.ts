@@ -1,4 +1,4 @@
-import { Frame } from "..";
+import { Frame } from '../index.d';
 
 export async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

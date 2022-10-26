@@ -1,20 +1,6 @@
-// 0E6
-
-import { Frame } from "../..";
+import { Frame, FrameExt } from '../../index.d';
 import { arr_to_num, bool_arr_to_int, fixed_dlc_len, hex_to_bin, x_bits_from_arr } from "../common";
-import { MESSAGE_TABLE } from "../message_table";
-
-export interface FrameParserInterface {
-    val: number;
-    bin: Array<Array<boolean>>;
-}
-
-export type FrameExt = {
-    data: {
-        [key: string]: string | number | boolean | Array<Array<boolean>>;
-    }
-} & FrameParserInterface;
-
+import { MESSAGE_TABLE } from "./message_table";
 
 
 /*

@@ -2,6 +2,7 @@ import { sleep } from "./core/common";
 import { parse_frame } from "./core/deserialization/frames";
 import { get_master, has_changed } from "./core/recall";
 import { test_data } from "./core/test_data";
+import { SerialPort } from 'serialport'
 
 import { Frame, Mode } from './index.d';
 
@@ -11,9 +12,12 @@ const readline = require('readline');
 
 // -- // CONFIG // -- //
 
-export const DEBUG_MODE: boolean = true;
+export const DEBUG_MODE: boolean = false;
 export const IGNORED_IDS: string[] = [];
 export const WHITE_LIST: string[] = [];
+
+export const DEVICE_PATH: string = '/dev/ttyUSB0';
+export const BUAD_RATE: number = 115200;
 
 export const MODE = Mode.ALL;
 
@@ -38,7 +42,16 @@ async function read_frames(fn: (arg0: Frame) => void, td = test_data) {
 
             break;
 
+
         case false:
+            const serial = new SerialPort({
+                path: DEVICE_PATH,
+                baudRate: BUAD_RATE 
+            });
+
+            serial.on('data', (data: Buffer) => {
+                console.log(data.toString());
+            });
             break;
     }
 }
