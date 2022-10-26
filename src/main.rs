@@ -45,9 +45,30 @@ fn main() {
 
         println!("Opening port: {} at {} Buad", port_name, BUAD_RATE);
 
-        let port = serialport::new(port_name, BUAD_RATE)
+        let mut port = serialport::new(port_name, BUAD_RATE)
             .timeout(Duration::from_millis(10))
             .open().expect("Failed to open port");
+
+        // -- Loop
+        while true {
+            // -- Read from serial
+            let mut buf = [0; 128];
+
+            match port.read(&mut buf) {
+                Ok(t) => {
+                    if t < 0 {
+                        return;
+                    }
+                        
+                    // -- Print to console
+                    let s = std::str::from_utf8(&buf).unwrap();
+
+                    print!("{}\n", s);
+                }
+                Err(ref e) if e.kind() == io::ErrorKind::TimedOut => (),
+                Err(e) => eprintln!("{:?}", e),
+            }            
+        }
     }
 }
 

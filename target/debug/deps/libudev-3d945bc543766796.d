@@ -1,0 +1,12 @@
+/home/grzegorz/Desktop/Peugeot-207-CAN-Bus/target/debug/deps/libudev-3d945bc543766796.rmeta: /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/lib.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/context.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/device.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/enumerator.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/error.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/monitor.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/handle.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/util.rs
+
+/home/grzegorz/Desktop/Peugeot-207-CAN-Bus/target/debug/deps/libudev-3d945bc543766796.d: /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/lib.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/context.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/device.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/enumerator.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/error.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/monitor.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/handle.rs /home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/util.rs
+
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/lib.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/context.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/device.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/enumerator.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/error.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/monitor.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/handle.rs:
+/home/grzegorz/.cargo/registry/src/github.com-1ecc6299db9ec823/libudev-0.3.0/src/util.rs:
