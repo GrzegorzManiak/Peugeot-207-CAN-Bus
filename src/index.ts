@@ -4,7 +4,7 @@ import { get_master, has_changed } from "./core/recall";
 import { test_data } from "./core/test_data";
 import { SerialPort } from 'serialport'
 
-import { Frame, Mode } from './index.d';
+import { Frame, Mode } from './types';
 
 const fs = require('fs');
 const readline = require('readline');

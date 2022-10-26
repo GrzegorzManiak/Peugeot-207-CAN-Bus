@@ -1,4 +1,4 @@
-import { Frame } from '../index.d';
+import { Frame } from '../types';
 const path = require('path');
 
 export interface TestDataInterface {

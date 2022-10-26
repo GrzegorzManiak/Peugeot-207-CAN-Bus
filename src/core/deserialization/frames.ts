@@ -1,4 +1,4 @@
-import { Frame, FrameExt } from '../../index.d';
+import { Frame, FrameExt } from '../../types';
 import { arr_to_num, bool_arr_to_int, fixed_dlc_len, hex_to_bin, x_bits_from_arr } from "../common";
 import { MESSAGE_TABLE } from "./message_table";
 
