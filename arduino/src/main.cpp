@@ -77,7 +77,7 @@ void loop()
   }
 
   // -- Add frame to combined_frames
-  combined_frames += frame;
+  combined_frames += frame.toLowerCase();
   frame_count++;
 
   // -- If frame_count is equal to FRAME_BATCH_SIZE send frames
@@ -85,7 +85,7 @@ void loop()
     frame_count >= FRAME_BATCH_SIZE ||
     (millis() - time_since_last_frame) > FRAME_BATCH_MS
   ) {
-    Serial.println(combined_frames + ";");
+    Serial.println(combined_frames);
     combined_frames = "";
     frame_count = 0;
   }
