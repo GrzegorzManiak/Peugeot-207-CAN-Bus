@@ -1,6 +1,6 @@
 use serialport::SerialPort;
 
-use crate::EOL_CHAR;
+use crate::{EOL_CHAR, Args};
 use crate::packet::{
     read_until::read_until,
     return_packets::return_packets,
@@ -12,7 +12,7 @@ use crate::deserialize::{
     FrameMap
 };
 
-pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>, debug_packet: String) {
+pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>, args: Args) {
     let mut freshness: FreshnessMap = FreshnessMap::new();
     let mut cache: FrameMap = FrameMap::new();
 
@@ -46,7 +46,7 @@ pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>, debug_packet: String)
         // -- A Debug port was selected
         None => {
             // -- Parse the group of packets
-            let packets = return_packets(debug_packet);
+            let packets = return_packets(args.debug_packet);
 
             // -- Print the packets
             for packet in packets {

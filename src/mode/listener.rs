@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use serialport::SerialPort;
-use crate::EOL_CHAR;
+use crate::{EOL_CHAR, Args};
 use crate::packet::Packet;
 use crate::packet::{
     read_until::read_until,
@@ -17,8 +17,6 @@ pub type PacketMap = HashMap<String, Packet>;
 pub fn draw_table(map: &mut PacketMap) {
     // -- Create a vector to store the packets
     let mut packets = Vec::new();
-
-    let mut max_data = 0;
 
     // -- Loop through the packets
     for (_, packet) in map {
@@ -37,14 +35,9 @@ pub fn draw_table(map: &mut PacketMap) {
             packet_string.push_str(&format!("{} ", b.to_string()));
         });
 
-        // -- Get the max data length
-        if packet_string.len() > max_data {
-            max_data = packet_string.len();
-        }
-
         println!("{} | {} | {}", 
             packet.id, 
-            pad_string(packet_string, max_data),
+            pad_string(packet_string, 239),
             packet.text()
         );
     }
@@ -69,7 +62,7 @@ pub fn pad_string(string: String, length: usize) -> String {
     padded_string
 }
 
-pub fn mode_listener(port: Option<Box<dyn SerialPort>>, debug_packet: String) {
+pub fn mode_listener(port: Option<Box<dyn SerialPort>>, args: Args) {
     let mut packet_map: PacketMap = PacketMap::new();
 
     match port {
@@ -100,7 +93,7 @@ pub fn mode_listener(port: Option<Box<dyn SerialPort>>, debug_packet: String) {
         // -- A Debug port was selected
         None => {
             // -- Parse the group of packets
-            let packets = return_packets(debug_packet);
+            let packets = return_packets(args.debug_packet);
 
             // -- Print the packets
             for packet in packets {

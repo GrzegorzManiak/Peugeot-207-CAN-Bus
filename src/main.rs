@@ -6,6 +6,7 @@ pub mod port;
 use mode::{
     deserialize::mode_deserialize,
     listener::mode_listener,
+    inspection::mode_inspector,
 };
 use port::{
     prompt_for_port::prompt_for_port,
@@ -22,6 +23,7 @@ pub struct Args {
     pub cli: bool,
     pub auto: bool,
     pub debug_packet: String,
+    pub inspect: String,
 }
 
 // -- Valid characters that a packet can contain
@@ -54,8 +56,9 @@ Allowing you to do things like:
 Usage:
     -b, --buad (default 115200) The baud rate to use
     -p, --port (default debug) The port to use (If -c is set, this will be ignored), eg: debug, /dev/ttyUSB0
-    -m, --mode (default 0) [0] Deserialize mode, [1] Listener mode
+    -m, --mode (default 0) [0] Deserialize mode, [1] Listener mode, [2] Inspector mode
     -c Enable the CLI
+    -i, --inspect (default '000') The packet to inspect
     -a Automatically find the port (Will ignore -p)
     -d, --debug-packet (default 'none') Provide a packet to use with the debug port
 ";
@@ -70,6 +73,7 @@ fn main() {
         cli: args.get_bool("c"),
         auto: args.get_bool("a"),
         debug_packet: args.get_string("debug-packet"),
+        inspect: args.get_string("inspect"),
     };
 
     let port: Option<Box<dyn SerialPort>>;
@@ -108,11 +112,15 @@ fn main() {
     match args.mode {
         0 => {
             // -- Deserialize mode
-            mode_deserialize(port, args.debug_packet);
+            mode_deserialize(port, args);
         }
         1 => {
             // -- Listener mode
-            mode_listener(port, args.debug_packet);
+            mode_listener(port, args);
+        }
+        2 => {
+            // -- Inspector mode
+            mode_inspector(port, args);
         }
         _ => {
             println!(">> Invalid mode");
