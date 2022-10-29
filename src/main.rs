@@ -1,5 +1,9 @@
-mod packets;
-use packets::Packet;
+mod packet;
+use packet::Packet;
+
+mod deserialize;
+use deserialize::{interpret_packet, CacheMap};
+
 use serialport::SerialPort;
 use std::{io, time::Duration};
 
@@ -15,11 +19,14 @@ const VALID_CHAR: [
 
 // -- Test packet to be used with the debug port
 const TEST_PACKET: &str = "
-    (14c,5)0,0,0,0,80 (168,8)0,0,0,0,0,0,0,0 (36,8)0,0,0,f,1,0,0,a0 
-    (221,7)0,ff,ff,ff,ff,ff,ff (b6,8)0,0,0,0,0,0,0,d0 (227,4)0,0,0,0 
-    (1a1,8)7f,ff,0,ff,ff,ff,ff,ff (18,5)80,0,0,0,0 (217,8)f2,80,0,0,80,ff,ff,ff 
-    (21f,3)0,0,0 (b6,8)0,0,0,0,0,0,0,d0 (167,8)8,6,ff,ff,7f,ff,0,0 
-    (128,8)1,0,0,0,0,0,b0,1 (14c,5)0,0,0,0,80 (1a8,8)0,0,0,0,0,10,2b,2
+(b6,8)0,0,0,0,0,0,0
+,d0(14c,5)0,0,0,0,0(217,8)f2,80,0,0,80,ff,ff,f
+f(3a7,8)10,0,0,3,65,0,35,5(168,8)2,0,0,2,4,0,0
+,0(36,8)0,0,80,f,1,0,0,a0(21f,3)0,0,0(b6,8)36,
+36,36,36,36,36,36,d0(220,2)0,0(1a1,8)7f,ff,0,ff,ff,f
+f,ff,ff(e6,6)10,0,0,0,0,69(167,8)0,6,ff,ff,7f,f
+f,0,0(b6,8)0,0,0,0,0,0,0,d0(df,3)84,0,60(217,
+8)f2,80,0,0,80,ff,ff,ff
 ";
 
 
@@ -27,6 +34,8 @@ const TEST_PACKET: &str = "
 fn main() {
     // -- Prompt the user for the port to use
     let port = prompt_for_port();
+    let mut cache: CacheMap = CacheMap::new();
+
 
     match port {
         // -- A real port was selected
@@ -44,7 +53,9 @@ fn main() {
 
                 // -- Print the packets
                 for packet in packets {
-                    println!("{:?}", packet);
+                    
+                    // -- Interpret the packet
+                    let interpreted_packet = interpret_packet(packet, &mut cache);
                 }
             }
         },
@@ -56,7 +67,9 @@ fn main() {
 
             // -- Print the packets
             for packet in packets {
-                println!("{:?}", packet);
+                
+                // -- Interpret the packet
+                let interpreted_packet = interpret_packet(packet, &mut cache);
             }
         },
     }
@@ -69,19 +82,24 @@ fn main() {
 // @return: Vec<String> - Vector of packets
 fn destruct_packet_group(group: String) -> Vec<String> { 
     // -- Verify that theres at least 1 packet
-    if group.contains(" ") == false {
+    if group.contains("(") == false {
         return Vec::new();
     }
 
+    // -- Combine into one string, remove any new lines
+    let mut group = group.replace("\r", "");
+    group = group.replace("\n", "");
+
     // -- Destructure the packet
-    let packets = group.split(" ");
+    let packets = group.split("(");
 
     // -- Create a vector to store the packets
     let mut packet_vec = Vec::new();
 
     // -- Loop through the packets
     for p in packets {
-        packet_vec.push(p.trim().to_string());
+        // -- Push the packet to the vector, and add the opening bracket
+        packet_vec.push(format!("({}", p));
     }
 
     // -- Return the vector
@@ -89,11 +107,11 @@ fn destruct_packet_group(group: String) -> Vec<String> {
 }
 
 
-// @name: validate_packet
+// @name: validate_raw_packet
 // @desc: Takes a string and verifies that it is a valid packet
 // @param: packet - String to be verified
 // @return: Option<Packet> - Returns a packet if it is valid, otherwise returns None
-fn validate_packet(packet: String) -> Option<Packet> {
+fn validate_raw_packet(packet: String) -> Option<Packet> {
     // -- Check if the packet is valid
     for c in packet.chars() {
         if !VALID_CHAR.contains(&c) {
@@ -142,11 +160,17 @@ fn validate_packet(packet: String) -> Option<Packet> {
     if data_split.len() != size as usize {
         return None;
     }
-    
 
+    // -- Pad the ID with 0's, if needed
+    let mut id = id.to_string();
+
+    while id.len() < 3 {
+        id = format!("0{}", id);
+    }
+    
     // -- Create a packet struct
     Some(Packet {
-        id: id.to_string(),
+        id,
         size,
         data: data_split.to_vec(),
     })
@@ -214,7 +238,7 @@ fn return_packets(buffer: String) -> Vec<Packet> {
     // -- Loop through the packets
     for raw_packet in raw_packets {
         // -- Verify the packet
-        if let Some(packet) = validate_packet(raw_packet) {
+        if let Some(packet) = validate_raw_packet(raw_packet) {
             // -- Add the packet to the vector
             packets.push(packet);
         }
