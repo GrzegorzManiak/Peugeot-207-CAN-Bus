@@ -1,7 +1,5 @@
 use serialport::SerialPort;
 
-use crate::TEST_PACKET;
-
 use crate::packet::{
     read_until::read_until,
     return_packets::return_packets,
@@ -13,7 +11,7 @@ use crate::deserialize::{
     FrameMap
 };
 
-pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>) {
+pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>, debug_packet: String) {
     let mut freshness: FreshnessMap = FreshnessMap::new();
     let mut cache: FrameMap = FrameMap::new();
 
@@ -47,7 +45,7 @@ pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>) {
         // -- A Debug port was selected
         None => {
             // -- Parse the group of packets
-            let packets = return_packets(TEST_PACKET.to_string());
+            let packets = return_packets(debug_packet);
 
             // -- Print the packets
             for packet in packets {
