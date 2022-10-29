@@ -29,8 +29,6 @@ pub fn test_port(port: &mut Box<dyn SerialPort>) -> bool {
     for _ in 0..MAX_RETRIES {        
         let data = read_until(port, buffer, EOL_CHAR);
 
-        if data != "" { println!("Data: {}", data); }
-
         // - Check if its an error
         if data.contains(ERR_PACKET) {
             return false;

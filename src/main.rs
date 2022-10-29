@@ -5,6 +5,7 @@ pub mod port;
 
 use mode::{
     deserialize::mode_deserialize,
+    listener::mode_listener,
 };
 use port::{
     prompt_for_port::prompt_for_port,
@@ -34,7 +35,7 @@ const ACK_PACKET: &str = "@GrzegorzManiak/ack";
 const ERR_PACKET: &str = "@GrzegorzManiak/err";
 
 const EOL_CHAR: char = ';';
-const MAX_RETRIES: u16 = 1000; // -- Max ammount of tries to open a port
+const MAX_RETRIES: u16 = 255; // -- Max ammount of tries to open a port
 
 const USAGE: &'static str = "
 @GrzegorzManiak/Peugeot-207-CAN-Bus
@@ -53,7 +54,7 @@ Allowing you to do things like:
 Usage:
     -b, --buad (default 115200) The baud rate to use
     -p, --port (default debug) The port to use (If -c is set, this will be ignored), eg: debug, /dev/ttyUSB0
-    -m, --mode (default 0) [0] Deserialize mode, [1] Listener mode
+    -m, --mode (default 1) [0] Deserialize mode, [1] Listener mode
     -c Enable the CLI
     -a Automatically find the port (Will ignore -p)
     -d, --debug-packet (default 'none') Provide a packet to use with the debug port
@@ -71,9 +72,16 @@ fn main() {
         debug_packet: args.get_string("debug-packet"),
     };
 
-
-    args.cli = true;
-
+    args.debug_packet = "
+        (e6,6)10,0,0,0,0,69(16
+        7,8)0,6,ff,ff,7f,ff,0,0(b6,8)0,0,0,0,0,0,0,d0(
+        217,8)f2,80,0,0,80,ff,ff,ff(128,8)60,1,0,0,0,c4,
+        b0,1(14c,5)0,0,0,0,0(18,5)80,0,2,0,0(1a8,8)0,
+        0,0,0,0,10,2b,2(21f,3)0,0,0(36,8)0,0,80,f,1,0,
+        0,a0(2b6,8)33,34,30,32,38,39,33,37(b6,8)0,0,0,
+        0,0,0,0,d0(161,7)0,0,35,d,0,0,64(e6,6)10,0,0,0
+        ,0,69(167,8)0,6,ff,ff,7f,ff,0,0
+    ".to_string();
 
     let port: Option<Box<dyn SerialPort>>;
 
@@ -115,7 +123,7 @@ fn main() {
         }
         1 => {
             // -- Listener mode
-            //listener(port);
+            mode_listener(port, args.debug_packet);
         }
         _ => {
             println!(">> Invalid mode");

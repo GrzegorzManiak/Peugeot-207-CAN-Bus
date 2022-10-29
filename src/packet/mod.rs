@@ -9,6 +9,7 @@ pub struct Packet {
     pub id: String,
     pub size: u8,
     pub data: Vec<Vec<bool>>,
+    pub bytes: Vec<String>
 }
 
 impl Packet {
@@ -39,5 +40,14 @@ impl Packet {
             i += 1;
         }
         num
+    }
+
+    // -- Converts the bytes to a UTF-8 string
+    pub fn text(&self) -> String {
+        let mut text = String::new();
+        for byte in self.bytes.iter() {
+            text.push_str(&String::from_utf8_lossy(&[u8::from_str_radix(byte, 16).unwrap()]));
+        }
+        text
     }
 }

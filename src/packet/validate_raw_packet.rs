@@ -40,6 +40,9 @@ pub fn validate_raw_packet(packet: String) -> Option<Packet> {
         return None;
     }
 
+    // -- Parse the data segment
+    let bytes: Vec<String> = split[1].split(',').map(|s| s.trim().to_string()).collect();
+
     // -- Split the data segment on the commas
     let data_split = split[1].split(',')
         .map(|x| u8::from_str_radix(x, 16).unwrap())
@@ -66,6 +69,7 @@ pub fn validate_raw_packet(packet: String) -> Option<Packet> {
     Some(Packet {
         id,
         size,
+        bytes,
         data: data_split.to_vec(),
     })
 }
