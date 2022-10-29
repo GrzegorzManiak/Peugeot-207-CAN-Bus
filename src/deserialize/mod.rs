@@ -9,17 +9,15 @@ pub trait Frame {
     fn print(&self);
     fn name(&self) -> &str;
     fn json(&self) -> serde_json::Value;
-
     fn clone(&self) -> Box<dyn Frame>;
 }
 
+
 pub type FreshnessMap = HashMap<String, usize>;
 pub type FrameMap = HashMap<String, Box<dyn Frame>>;
+pub enum DataFreshness { Fresh, Stale }
 
-pub enum DataFreshness {
-    Fresh,
-    Stale
-}
+
 
 fn figure_freshness(frame: Box<dyn Frame>, freshness: &mut FreshnessMap) -> DataFreshness {
     let mut data_freshness = DataFreshness::Stale;

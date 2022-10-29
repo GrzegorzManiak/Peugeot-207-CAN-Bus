@@ -1,5 +1,8 @@
 mod packet;
-use packet::Packet;
+use packet::{
+    return_packets::return_packets,
+    read_until::read_until
+};
 
 mod deserialize;
 use deserialize::{interpret_packet, FreshnessMap, FrameMap};
@@ -63,7 +66,7 @@ fn main() {
                 for packet in packets {
                     
                     // -- Interpret the packet
-                    let interpreted_packet = interpret_packet(
+                    interpret_packet(
                         packet, 
                         &mut freshness, 
                         &mut cache
@@ -81,7 +84,7 @@ fn main() {
             for packet in packets {
                 
                 // -- Interpret the packet
-                let interpreted_packet = interpret_packet(
+                interpret_packet(
                     packet, 
                     &mut freshness,
                     &mut cache
@@ -89,179 +92,6 @@ fn main() {
             }
         },
     }
-}
-
-
-// @name: destruct_packet_group
-// @desc: Takes a string of packets and returns a vector of strings
-// @param: group - String of packets to be split
-// @return: Vec<String> - Vector of packets
-fn destruct_packet_group(group: String) -> Vec<String> { 
-    // -- Verify that theres at least 1 packet
-    if group.contains("(") == false {
-        return Vec::new();
-    }
-
-    // -- Combine into one string, remove any new lines
-    let mut group = group.replace("\r", "");
-    group = group.replace("\n", "");
-
-    // -- Destructure the packet
-    let packets = group.split("(");
-
-    // -- Create a vector to store the packets
-    let mut packet_vec = Vec::new();
-
-    // -- Loop through the packets
-    for p in packets {
-        // -- Push the packet to the vector, and add the opening bracket
-        packet_vec.push(format!("({}", p));
-    }
-
-    // -- Return the vector
-    packet_vec
-}
-
-
-// @name: validate_raw_packet
-// @desc: Takes a string and verifies that it is a valid packet
-// @param: packet - String to be verified
-// @return: Option<Packet> - Returns a packet if it is valid, otherwise returns None
-fn validate_raw_packet(packet: String) -> Option<Packet> {
-    // -- Check if the packet is valid
-    for c in packet.chars() {
-        if !VALID_CHAR.contains(&c) {
-            return None;
-        }
-    }
-
-    // -- Packet must contain a '(' and a ')'
-    if !packet.contains('(') || !packet.contains(')') {
-        return None;
-    }
-
-    // -- Try to get the ID and size, if it fails then the packet is invalid
-    // split the packet on )
-    let split = packet.split(')').collect::<Vec<&str>>();
-
-    // -- Check if the segment contains a comma and a '('
-    if !split[0].contains(',') || !split[0].contains('(') {
-        return None;
-    }
-
-    // -- Split the segment on the comma
-    let info_split = split[0].split(',').collect::<Vec<&str>>();
-
-    // -- Get the ID and size
-    let id = info_split[0].trim().trim_start_matches('(');
-    let size = info_split[1].trim().parse::<u8>().unwrap();
-
-
-    // -- that the data segment contains size - 1 commas
-    if split[1].matches(',').count() != (size - 1) as usize {
-        return None;
-    }
-
-    // -- Split the data segment on the commas
-    let data_split = split[1].split(',')
-        .map(|x| u8::from_str_radix(x, 16).unwrap())
-        .map(|x| format!("{:08b}", x))
-        .map(|x| x.chars()
-            .map(|x| x == '1')
-            .collect::<Vec<bool>>())
-        .collect::<Vec<Vec<bool>>>();
-
-
-    // -- Check if the data segment contains the correct number of bytes
-    if data_split.len() != size as usize {
-        return None;
-    }
-
-    // -- Pad the ID with 0's, if needed
-    let mut id = id.to_string();
-
-    while id.len() < 3 {
-        id = format!("0{}", id);
-    }
-    
-    // -- Create a packet struct
-    Some(Packet {
-        id,
-        size,
-        data: data_split.to_vec(),
-    })
-}
-
-
-// @name: read_until
-// @desc: Read from a serial port until a character is found
-// @param: port: &mut serialport::SerialPort - The port to read from
-// @param: buffer: &mut Vec<u8> - If we find the character, we will return whatevers left in the buffer
-// @param: character: char - The character to look for
-// @return: String
-//
-// We only add data to the buffer if we have data leftover from the last read
-// eg: if we read 'Hello' and the character is 'l', we will return 'Hello' 
-// and the next read will be 'lo' + data from the port
-fn read_until(port: &mut Box<dyn SerialPort>, buffer: &mut Vec<u8>, character: char) -> String {
-    // -- Read from the port
-    let mut data = vec![0; 128];
-    match port.read(&mut data) {
-        Ok(t) => {
-            // -- If we have data, add it to the buffer
-            if t > 0 {
-                buffer.extend_from_slice(&data[0..t]);
-            }
-        }
-        Err(ref e) if e.kind() == io::ErrorKind::TimedOut => (),
-        Err(e) => eprintln!("{:?}", e),
-    }
-
-    // -- Convert the buffer to a string
-    let string = String::from_utf8_lossy(&buffer).to_string();
-
-    // -- If the string contains the character, return the string
-    if string.contains(character) {
-        // -- Get the index of the character
-        let index = string.find(character).unwrap();
-
-        // -- Get the string before the character
-        let return_string = string[0..index].to_string();
-
-        // -- Remove the string before the character from the buffer
-        buffer.drain(0..index + 1);
-
-        // -- Return the string
-        return return_string;
-    }
-
-    // -- If we don't have the character, return an empty string
-    String::new()
-}
-
-
-// @name: return_packets
-// @desc: Return the packets from the buffer
-// @param: buffer: String - The buffer to read from
-// @return: Vec<Packet>
-fn return_packets(buffer: String) -> Vec<Packet> {
-    // -- Create a vector to store the packets
-    let mut packets = Vec::new();
-
-    // -- Split the buffer on the packet separator
-    let raw_packets = destruct_packet_group(buffer);
-
-    // -- Loop through the packets
-    for raw_packet in raw_packets {
-        // -- Verify the packet
-        if let Some(packet) = validate_raw_packet(raw_packet) {
-            // -- Add the packet to the vector
-            packets.push(packet);
-        }
-    }
-
-    // -- Return the packets
-    packets
 }
 
 

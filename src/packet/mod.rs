@@ -1,3 +1,9 @@
+pub mod destruct_packet_group;
+pub mod return_packets;
+pub mod validate_raw_packet;
+pub mod read_until;
+
+
 #[derive(Debug)]
 pub struct Packet {
     pub id: String,
@@ -6,14 +12,6 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub fn new(id: String, size: u8, data: Vec<Vec<bool>>) -> Packet {
-        Packet {
-            id,
-            size,
-            data,
-        }
-    }
-
     pub fn bit_range(&self, start: usize, end: usize) -> Vec<&bool> {
         let mut bits = Vec::new();
         let mut i = 0;
