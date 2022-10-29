@@ -1,5 +1,6 @@
 use serialport::SerialPort;
 
+use crate::EOL_CHAR;
 use crate::packet::{
     read_until::read_until,
     return_packets::return_packets,
@@ -24,7 +25,7 @@ pub fn mode_deserialize(port: Option<Box<dyn SerialPort>>, debug_packet: String)
             // -- Start the loop 
             loop {
                 // -- Read the packet from the port
-                let raw_data = read_until(&mut port, buffer, '\n');
+                let raw_data = read_until(&mut port, buffer, EOL_CHAR);
 
                 // -- Parse the group of packets
                 let packets = return_packets(raw_data);

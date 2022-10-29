@@ -20,6 +20,8 @@ MCP_CAN CAN0(53);       // Set CS to pin 53
 #define ACK_PACKET "@GrzegorzManiak/ack"
 #define ERR_PACKET "@GrzegorzManiak/err"
 
+#define EOL_CHAR ';'
+
 
 // -- Variables
 long unsigned int rx_Id;
@@ -46,6 +48,9 @@ void setup() {
 
   // -- Configuring pin for /INT input 
   pinMode(CAN0_INT, INPUT); 
+
+  // -- Send out a FIN frame
+  Serial.println(FIN_PACKET + String(EOL_CHAR));
 }
 
 
@@ -53,7 +58,7 @@ void loop()
 {
   // -- Initiate
   while(!is_initiated) {
-
+    delay(1);
     initiate();
 
     if(error) {
@@ -86,7 +91,6 @@ void loop()
   for(byte i = 0; i<len; i++){
     frame += String(rx_buf[i], HEX);
     if(i < len-1) frame += ",";
-    else frame += " ";
   }
 
   // -- Add frame to combined_frames
@@ -98,7 +102,7 @@ void loop()
     frame_count >= FRAME_BATCH_SIZE ||
     (millis() - time_since_last_frame) > FRAME_BATCH_MS
   ) {
-    Serial.println(combined_frames);
+    Serial.println(combined_frames + String(EOL_CHAR));
     combined_frames = "";
     frame_count = 0;
   }
@@ -109,19 +113,21 @@ void loop()
 
 void initiate() {
   // -- Lets await for the initiation packet
-  if(Serial.available() < 1 ) return;
+  if(Serial.available() > 0 ) {
+      
+    // -- Read the packet
+    String packet = Serial.readStringUntil(EOL_CHAR);
     
-  // -- Read the packet
-  String packet = Serial.readStringUntil('\n');
-
-  // -- Check if it's the initiation packet
-  if(packet == FIN_PACKET && fin_received == false) {
-    fin_received = true;
-    Serial.println(ACK_PACKET);
-  }
-
-  // -- Check if we have acknowledged the initiation packet
-  if(packet == ACK_PACKET && fin_received == true) {
-    is_initiated = true;
+  
+    // -- Check if it's the initiation packet
+    if(packet == ACK_PACKET && fin_received == false) {
+      fin_received = true;
+    }
+  
+    // -- Check if we have acknowledged the initiation packet
+    if(packet == FIN_PACKET && fin_received == true) {
+      is_initiated = true;
+      Serial.println(ACK_PACKET + String(EOL_CHAR));
+    }
   }
 }

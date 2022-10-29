@@ -15,6 +15,7 @@ use serialport::SerialPort;
 pub fn read_until(port: &mut Box<dyn SerialPort>, buffer: &mut Vec<u8>, character: char) -> String {
     // -- Read from the port
     let mut data = vec![0; 128];
+
     match port.read(&mut data) {
         Ok(t) => {
             // -- If we have data, add it to the buffer
@@ -28,6 +29,7 @@ pub fn read_until(port: &mut Box<dyn SerialPort>, buffer: &mut Vec<u8>, characte
 
     // -- Convert the buffer to a string
     let string = String::from_utf8_lossy(&buffer).to_string();
+
 
     // -- If the string contains the character, return the string
     if string.contains(character) {

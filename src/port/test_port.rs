@@ -1,10 +1,17 @@
 use serialport::SerialPort;
-use std::io;
 use crate::{
+    packet::read_until::read_until,
     FIN_PACKET, 
     ERR_PACKET, 
-    ACK_PACKET
+    ACK_PACKET,
+    EOL_CHAR,
+    MAX_RETRIES 
 };
+
+// Arduino > FIN
+// Host > ACK
+// Arduino > FIN
+
 
 // @name: test_port
 // @desc: Test a port to see if it is a valid port
@@ -13,35 +20,40 @@ use crate::{
 // Basically, we send a message to the port and wait for a response
 // if we get a response, we know the port is valid
 pub fn test_port(port: &mut Box<dyn SerialPort>) -> bool {
-    // -- Send the test message
-    port.write(FIN_PACKET.as_bytes()).unwrap();
+    // -- Read the response
+    let buffer: &mut Vec<u8> = &mut Vec::new();
+
+    let mut fin_ack = false;
 
     // -- Read from the port
-    let mut data = vec![0; 128];
-    match port.read(&mut data) {
-        Ok(t) => {
-            // -- If we have data, add it to the buffer
-            if t > 0 {
-                // -- Convert the buffer to a string
-                let string = String::from_utf8_lossy(&data[0..t]).to_string();
+    for _ in 0..MAX_RETRIES {        
+        let data = read_until(port, buffer, EOL_CHAR);
 
-                // - Check if its an error
-                if string.contains(ERR_PACKET) {
-                    return false;
-                }
+        if data != "" { println!("Data: {}", data); }
 
-                // -- Check if the string contains the test message
-                else if string.contains(ACK_PACKET) {
-                    // -- Respond with ACK
-                    port.write(ACK_PACKET.as_bytes()).unwrap();
-                    
-                    // -- Return true
-                    return true;
-                }
-            }
+        // - Check if its an error
+        if data.contains(ERR_PACKET) {
+            return false;
         }
-        Err(ref e) if e.kind() == io::ErrorKind::TimedOut => (),
-        Err(e) => eprintln!("{:?}", e),
+
+        // -- Check if the string contains the test message
+        else if data.contains(FIN_PACKET) && fin_ack == false {
+            // -- Respond with ACK
+            port.write(format!("{}{}", ACK_PACKET, EOL_CHAR).as_bytes()).unwrap();
+            port.write(format!("{}{}", FIN_PACKET, EOL_CHAR).as_bytes()).unwrap();
+
+            // -- set fin_ack to true
+            fin_ack = true;
+        }
+
+        // -- Check if the arduino responded with an ACK
+        else if data.contains(ACK_PACKET) && fin_ack == true {
+            // -- Respond with FIN
+            port.write(format!("{}{}", FIN_PACKET, EOL_CHAR).as_bytes()).unwrap();
+
+            // -- Return true
+            return true;
+        }
     }
 
     // -- If we didn't get a response, return false

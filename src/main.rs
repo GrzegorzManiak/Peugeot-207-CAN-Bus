@@ -33,6 +33,9 @@ const FIN_PACKET: &str = "@GrzegorzManiak/fin";
 const ACK_PACKET: &str = "@GrzegorzManiak/ack";
 const ERR_PACKET: &str = "@GrzegorzManiak/err";
 
+const EOL_CHAR: char = ';';
+const MAX_RETRIES: u16 = 1000; // -- Max ammount of tries to open a port
+
 const USAGE: &'static str = "
 @GrzegorzManiak/Peugeot-207-CAN-Bus
 
@@ -42,10 +45,10 @@ but I don't have any other cars, just clone the repo and
 change the packets in the deserialize module)
 
 Allowing you to do things like:
-- Read and write to the confort CAN Bus
-- Figure out what packets do what
-- Launch without a CLI and use the program as a library
-- Use the debug port to test packets
+: Read and write to the confort CAN Bus
+: Figure out what packets do what
+: Launch without a CLI and use the program as a library
+: Use the debug port to test packets
 
 Usage:
     -b, --buad (default 115200) The baud rate to use
@@ -53,13 +56,13 @@ Usage:
     -m, --mode (default 0) [0] Deserialize mode, [1] Listener mode
     -c Enable the CLI
     -a Automatically find the port (Will ignore -p)
-    -d, --debug-packet (string) Provide a packet to use with the debug port
+    -d, --debug-packet (default 'none') Provide a packet to use with the debug port
 ";
 
 
 fn main() {
     let args = lapp::parse_args(USAGE);
-    let args = Args {
+    let mut args = Args {
         baud_rate: args.get_integer("buad") as u32,
         mode: args.get_integer("mode") as u8,
         port: args.get_string("port"),
@@ -68,6 +71,8 @@ fn main() {
         debug_packet: args.get_string("debug-packet"),
     };
 
+
+    args.cli = true;
 
 
     let port: Option<Box<dyn SerialPort>>;
