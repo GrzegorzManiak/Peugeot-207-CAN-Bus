@@ -1,3 +1,5 @@
 target
 .vscode
 Cargo.lock
+arduino/.pio
+arduino/.vscode
