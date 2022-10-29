@@ -1,4 +1,4 @@
-#Peugeot-207-CAN-Bus
+# Peugeot-207-CAN-Bus
 
 
 ## Description
@@ -39,5 +39,5 @@ change the packets in the deserialize module)
 
 ## Dependencies
 - Linux:
-    sudo apt install pkg-config
-    sudo apt install libudev-dev
+    -pkg-config
+    -libudev-dev
