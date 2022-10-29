@@ -1,3 +1,4 @@
+use serde_json::json;
 use crate::packet::Packet;
 use super::Frame;
 
@@ -34,6 +35,17 @@ impl Frame for F220 {
     // -- Return the name of the frame &str
     fn name(&self) -> &str {
         "220"
+    }
+
+    // -- Return the data as json
+    fn json(&self) -> serde_json::Value {
+        json!({
+            "front_left_door": self.front_left_door,
+            "front_right_door": self.front_right_door,
+            "rear_left_door": self.rear_left_door,
+            "rear_right_door": self.rear_right_door,
+            "boot": self.boot
+        })
     }
 }
 

@@ -4,11 +4,11 @@ use std::collections::HashMap;
 mod F220;
 mod F0B6;
 
-
 pub trait Frame {
     fn freshness(&self) -> usize;
     fn print(&self);
     fn name(&self) -> &str;
+    fn json(&self) -> serde_json::Value;
 }
 
 pub type CacheMap = HashMap<String, usize>;

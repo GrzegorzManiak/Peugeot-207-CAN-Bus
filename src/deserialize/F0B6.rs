@@ -1,3 +1,4 @@
+use serde_json::json;
 use crate::packet::Packet;
 use super::Frame;
 
@@ -31,6 +32,16 @@ impl Frame for F0B6 {
     // -- Return the name of the frame &str
     fn name(&self) -> &str {
         "0B6"
+    }
+
+    // -- Return the data as json
+    fn json(&self) -> serde_json::Value {
+        json!({
+            "rpm": self.rpm,
+            "speed": self.speed,
+            "driven": self.driven,
+            "fuel_consumption_counter": self.fuel_consumption_counter
+        })
     }
 }
 
