@@ -2,7 +2,7 @@ mod packet;
 use packet::Packet;
 
 mod deserialize;
-use deserialize::{interpret_packet, CacheMap};
+use deserialize::{interpret_packet, FreshnessMap, FrameMap};
 
 use serialport::SerialPort;
 use std::{io, time::Duration};
@@ -40,7 +40,9 @@ const ERR_PACKET: &str = "@GrzegorzManiak/err";
 fn main() {
     // -- Prompt the user for the port to use
     let port = prompt_for_port();
-    let mut cache: CacheMap = CacheMap::new();
+
+    let mut freshness: FreshnessMap = FreshnessMap::new();
+    let mut cache: FrameMap = FrameMap::new();
 
 
     match port {
@@ -61,7 +63,11 @@ fn main() {
                 for packet in packets {
                     
                     // -- Interpret the packet
-                    let interpreted_packet = interpret_packet(packet, &mut cache);
+                    let interpreted_packet = interpret_packet(
+                        packet, 
+                        &mut freshness, 
+                        &mut cache
+                    );
                 }
             }
         },
@@ -75,7 +81,11 @@ fn main() {
             for packet in packets {
                 
                 // -- Interpret the packet
-                let interpreted_packet = interpret_packet(packet, &mut cache);
+                let interpreted_packet = interpret_packet(
+                    packet, 
+                    &mut freshness,
+                    &mut cache
+                );
             }
         },
     }

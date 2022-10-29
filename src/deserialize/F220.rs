@@ -47,6 +47,16 @@ impl Frame for F220 {
             "boot": self.boot
         })
     }
+
+    fn clone(&self) -> Box<dyn Frame> {
+        Box::new(F220 {
+            front_left_door: self.front_left_door,
+            front_right_door: self.front_right_door,
+            rear_left_door: self.rear_left_door,
+            rear_right_door: self.rear_right_door,
+            boot: self.boot
+        })
+    }
 }
 
 

@@ -43,6 +43,15 @@ impl Frame for F0B6 {
             "fuel_consumption_counter": self.fuel_consumption_counter
         })
     }
+
+    fn clone(&self) -> Box<dyn Frame> {
+        Box::new(F0B6 {
+            rpm: self.rpm,
+            speed: self.speed,
+            driven: self.driven,
+            fuel_consumption_counter: self.fuel_consumption_counter
+        })
+    }
 }
 
 
