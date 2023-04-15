@@ -176,6 +176,5 @@ void handle_ap() {
 
 
 void read_frame() {
-    // String data = "data=" + String(combined_frames);
-    // server.send(200, "text/html", data);
+    server.send(200, "application/json", read_string_list());
 }
