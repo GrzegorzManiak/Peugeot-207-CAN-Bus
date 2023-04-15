@@ -112,14 +112,17 @@ fn main() {
     match args.mode {
         0 => {
             // -- Deserialize mode
+            println!(">> Deserialize mode");
             mode_deserialize(port, args);
         }
         1 => {
             // -- Listener mode
+            println!(">> Listener mode");
             mode_listener(port, args);
         }
         2 => {
             // -- Inspector mode
+            println!(">> Inspector mode");
             mode_inspector(port, args);
         }
         _ => {

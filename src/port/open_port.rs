@@ -12,7 +12,7 @@ pub fn open_port(port_name: &str, buad_rate: u32) -> Option<Box<dyn SerialPort>>
     if port_name == "debug" {
         return None;
     }
-
+    
     // -- Attempt to open the port
     match serialport::new(port_name, buad_rate)
         .timeout(Duration::from_millis(10))

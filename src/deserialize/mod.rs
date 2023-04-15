@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 mod F220;
 mod F0B6;
+mod F1A0;
 
 pub type FreshnessMap = HashMap<String, usize>;
 pub type FrameMap = HashMap<String, Box<dyn Frame>>;
@@ -54,6 +55,7 @@ pub fn interpret_packet(
     {
         "220" => F220::frame(packet),
         "0B6" => F0B6::frame(packet),
+        "1A0" => F1A0::frame(packet),
         _ => return None
     };
 

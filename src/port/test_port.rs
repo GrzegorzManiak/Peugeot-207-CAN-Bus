@@ -31,6 +31,7 @@ pub fn test_port(port: &mut Box<dyn SerialPort>) -> bool {
 
         // - Check if its an error
         if data.contains(ERR_PACKET) {
+            println!(">> Error: {}", data);
             return false;
         }
 
@@ -53,6 +54,9 @@ pub fn test_port(port: &mut Box<dyn SerialPort>) -> bool {
             return true;
         }
     }
+
+    // -- Print out how far we got
+    println!(">> Error: {:?}, ACK: {}", buffer, fin_ack);
 
     // -- If we didn't get a response, return false
     false
