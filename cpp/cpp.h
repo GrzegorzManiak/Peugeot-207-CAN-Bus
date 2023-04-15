@@ -6,7 +6,7 @@
     #include "adxl.h"
     #include "can_bus.h"
 
-    #define DEBUG true
+    #define DEBUG false
     #define BAUD_RATE 115200
 
     void loop();

@@ -82,7 +82,7 @@ void setup_wifi() {
     Serial.println("Starting routes");
     server.on("/", handle_ap);
     server.on("/ap", handle_ssid_pass);
-    server.on("/clear_saved", read_frame);
+    server.on("/clear_saved", clear_saved_wifi);
     server.on("/read", read_frame);
 
     Serial.println("Starting Server");
@@ -176,5 +176,5 @@ void handle_ap() {
 
 
 void read_frame() {
-    server.send(200, "application/json", read_string_list());
+    server.send(200, "text/plain", read_string_list());
 }

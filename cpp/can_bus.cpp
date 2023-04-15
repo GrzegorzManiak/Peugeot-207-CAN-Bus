@@ -1,18 +1,20 @@
 #include "can_bus.h"
+#include <Arduino.h>
 
 MCP_CAN CAN0(3); 
 long unsigned int rx_Id;
 unsigned char len = 0;
 unsigned char rx_buf[8];
 bool error = false;
-char** string_list = NULL; 
-size_t list_size = 0;
+
+// -- This stores the list of strings that we will send to the server
+String string_list[MAX_STRING_LIST_SIZE];
 
 
 // -- This is a list of Packet ID's that we accept
 const long unsigned int valid_ids[] = {
-    0x0110100000,
-    0x1000100000,
+    0x0B6, // -- Odometer and Extras
+    0x220, // -- Door Status
 };
 
 
@@ -49,7 +51,7 @@ void read_from_can_bus() {
         }
     }
 
-    if (!valid) return;
+    if (!valid && !FREE_FLOW) return;
     else parse_can_packet(rx_Id, len, rx_buf);
 }
 
@@ -62,59 +64,48 @@ void parse_can_packet(
     // -- Convert the packet into a pseduo JSON string
     // String frame = "(" + String(rx_Id, HEX) + "," + String(len, HEX) + ")";
 
-    String data = "[";
+    String data;
     for(byte i = 0; i < len; i++){
         data += String(rx_buf[i], HEX);
         if(i < len-1) data += ",";
     }
-    data += "]";
 
-    String formated_object = "{ \"id\": \"" + String(id, HEX) + "\", \"data\": " + data + " }";
+    String formated_object = String(id, HEX) + ":" + data
     add_string(formated_object.c_str());
 }   
 
 
 void add_string(const char* str) {
-    size_t str_len = strlen(str);
+    // -- If the list is full, trim it
+    int list_size = sizeof(string_list) / sizeof(string_list[0]);
 
-    // -- If the string list is not large enough to hold the new string, trim it
-    if (list_size == 0 || list_size <= strlen(str)) {
-
-        char** new_list = (char**)malloc((list_size + 1) * sizeof(char*));
-        if (new_list == NULL) return; 
-
-        for (size_t i = 0; i < list_size; i++) {
-            new_list[i] = string_list[i]; }
-
-        free(string_list); 
-        string_list = new_list;
-        list_size++; 
+    if (list_size >= MAX_STRING_LIST_SIZE) {
+        for (size_t i = 0; i < MAX_STRING_LIST_SIZE - 1; i++) {
+            string_list[i] = string_list[i + 1];
+        }
+        list_size--;
     }
 
-
-    // -- Allocate memory for the new string and add it to the list
-    char* new_string = (char*)malloc(str_len + 1); // Add 1 for the null terminator
-    if (new_string == NULL) return; 
-    strncpy(new_string, str, str_len);
-    new_string[str_len] = '\0';
-    string_list[list_size - 1] = new_string; 
-}
-
-
-String read_string_list() {
-    String output = "[";
-    for (size_t i = 0; i < list_size; i++) {
-        output += string_list[i];
-        if (i < list_size - 1) output += ",";  
-    }
-    clear_string_list();
-    return output + "]";
+    // -- Add the new string to the list
+    string_list[list_size] = str;
 }
 
 
 void clear_string_list() {
-  for (size_t i = 0; i < list_size; i++) {
-    free(string_list[i]);
-    string_list[i] = NULL;
-  }
+    int list_size = sizeof(string_list) / sizeof(string_list[0]);
+    for (size_t i = 0; i < list_size; i++) {
+        string_list[i] = "";
+    }
+}
+
+
+String read_string_list() {
+    String output;
+    int list_size = sizeof(string_list) / sizeof(string_list[0]);
+    for (size_t i = 0; i < list_size; i++) {
+        output += string_list[i];
+        if (i < list_size - 1) output += "|";  
+    }
+    clear_string_list();
+    return output;
 }
